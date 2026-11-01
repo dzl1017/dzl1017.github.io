@@ -1,0 +1,436 @@
+/* ==========================================================
+   作品集样式
+   想改配色，只动下面 :root 里的几个值就够了。
+   ========================================================== */
+
+:root {
+  --bg:        #fbfbfa;   /* 页面底色 */
+  --ink:       #14161a;   /* 主文字 */
+  --muted:     #71767f;   /* 次要文字 */
+  --line:      #e6e6e3;   /* 分隔线 */
+  --accent:    #14161a;   /* 强调色，目前用的是黑 */
+  --radius:    6px;
+  --wrap:      1040px;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 84px;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+               "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC",
+               "Noto Sans CJK SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ---------- 顶部导航 ---------- */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(251, 251, 250, 0.86);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 62px;
+}
+
+.brand {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.nav-links {
+  display: flex;
+  gap: 26px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.nav-links a:hover { color: var(--ink); }
+
+/* ---------- 头部自我介绍 ---------- */
+
+.hero {
+  padding-top: 96px;
+  padding-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 18px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hero h1 {
+  margin: 0 0 20px;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.lede {
+  margin: 0 0 34px;
+  max-width: 36em;
+  font-size: 18px;
+  color: #3d424a;
+  line-height: 1.8;
+}
+
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px 28px;
+  margin: 0;
+  padding: 22px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+  font-size: 14px;
+}
+
+.hero-meta li {
+  display: flex;
+  gap: 10px;
+  color: var(--ink);
+}
+
+.hero-meta li span {
+  flex: none;
+  min-width: 2.6em;
+  color: var(--muted);
+}
+
+/* ---------- 区块标题 ---------- */
+
+.section-title {
+  margin: 0 0 40px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.works { padding-top: 72px; padding-bottom: 40px; }
+
+/* ---------- 单个项目 ---------- */
+
+.project {
+  padding: 44px 0 64px;
+  border-top: 1px solid var(--line);
+}
+
+.project-head {
+  display: flex;
+  gap: 20px;
+  align-items: baseline;
+  margin-bottom: 18px;
+}
+
+.project-index {
+  flex: none;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  padding-top: 8px;
+}
+
+.project h3 {
+  margin: 0 0 6px;
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.project-subtitle {
+  margin: 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.project-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 32px;
+  margin: 0 0 22px 43px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.project-meta b {
+  font-weight: 500;
+  color: #4a5058;
+  margin-right: 8px;
+}
+
+.project-summary {
+  margin: 0 0 18px 43px;
+  max-width: 34em;
+  color: #3d424a;
+}
+
+.highlights {
+  margin: 0 0 32px 43px;
+  padding: 0;
+  list-style: none;
+  font-size: 14.5px;
+  color: #4a5058;
+}
+
+.highlights li {
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 6px;
+}
+
+.highlights li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.72em;
+  width: 5px;
+  height: 1px;
+  background: #b9bcc1;
+}
+
+/* ---------- 图库（瀑布流） ---------- */
+
+.gallery {
+  margin-left: 43px;
+  columns: 2;
+  column-gap: 14px;
+}
+
+.gallery figure {
+  margin: 0 0 14px;
+  break-inside: avoid;
+}
+
+.gallery img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  background: #f0f0ee;
+  cursor: zoom-in;
+  transition: opacity 0.2s ease;
+}
+
+.gallery img:hover { opacity: 0.88; }
+
+.gallery figcaption {
+  margin-top: 7px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.gallery-empty {
+  margin-left: 43px;
+  padding: 34px 28px;
+  border: 1px dashed #dcdcd8;
+  border-radius: var(--radius);
+  font-size: 13.5px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.7;
+}
+
+.gallery-empty strong {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #4a5058;
+}
+
+.gallery-empty span { display: block; }
+
+/* ---------- 关于 ---------- */
+
+.about {
+  padding-top: 72px;
+  padding-bottom: 96px;
+}
+
+.about-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 8px 44px;
+  max-width: 760px;
+}
+
+.about-body p { margin: 0 0 16px; color: #3d424a; }
+
+/* ---------- 页脚 ---------- */
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 26px;
+  padding-bottom: 46px;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.footer-links { display: flex; gap: 20px; }
+.footer-links a:hover { color: var(--ink); }
+
+/* ---------- 图片放大层 ---------- */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(12, 13, 15, 0.93);
+  padding: 4vw;
+}
+
+.lightbox[hidden] { display: none; }
+
+.lightbox img {
+  max-width: 92vw;
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.lb-close, .lb-prev, .lb-next {
+  position: absolute;
+  background: none;
+  border: 0;
+  color: #f2f2f2;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.65;
+  padding: 10px 14px;
+}
+
+.lb-close:hover, .lb-prev:hover, .lb-next:hover { opacity: 1; }
+
+.lb-close { top: 18px; right: 22px; font-size: 34px; }
+.lb-prev  { left: 12px; top: 50%; transform: translateY(-50%); }
+.lb-next  { right: 12px; top: 50%; transform: translateY(-50%); }
+
+.lb-caption {
+  position: absolute;
+  bottom: 22px;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(242, 242, 242, 0.7);
+}
+
+/* ---------- 窄屏 ---------- */
+
+@media (max-width: 900px) {
+  .gallery { columns: 2; }
+}
+
+@media (max-width: 620px) {
+  .wrap { padding-left: 20px; padding-right: 20px; }
+  .hero { padding-top: 64px; }
+  .gallery { columns: 1; margin-left: 0; }
+  .project-meta, .project-summary, .highlights, .gallery-empty { margin-left: 0; }
+  .project-head { gap: 12px; }
+  .highlights li { font-size: 14px; }
+  .footer { flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .gallery img { transition: none; }
+}
+
+/* ---------- 项目内的下载入口（比如 APK） ---------- */
+.project-download {
+  margin: 28px 0 0;
+}
+.project-download a {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.project-download a::before {
+  content: '↓';
+  margin-right: 8px;
+  font-size: 0.95em;
+}
+.project-download a:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* ---- 代码片段 ---- */
+.project-code {
+  margin: 28px 0 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fafaf9;
+}
+.code-title {
+  padding: 10px 16px;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  background: #f5f5f3;
+}
+.project-code pre {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+  font-size: 0.78rem;
+  line-height: 1.62;
+  color: #26282e;
+  -webkit-text-size-adjust: 100%;
+}
+.project-code code { font-family: inherit; white-space: pre; }
+@media (max-width: 620px) {
+  .project-code pre { font-size: 0.72rem; padding: 12px; }
+}

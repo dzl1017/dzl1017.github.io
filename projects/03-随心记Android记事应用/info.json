@@ -1,0 +1,34 @@
+{
+  "title": "随心记 · Android 本地记事应用",
+  "subtitle": "Android 实战应用 · 本地化存储",
+  "period": "2024.11 – 2025.01",
+  "role": "独立开发",
+  "tags": ["Android Studio", "Java", "SQLite", "CRUD"],
+  "summary": "日常记录需求频繁，而主流笔记 App 功能冗杂、依赖网络，缺少一款轻量、完全本地化的备忘工具。于是独立开发了这款本地记事 App，实现账号管理、笔记增删改查与本地数据持久化。",
+  "highlights": [
+    "基于 Java 与系统原生 API 搭建，登录注册、笔记列表、编辑页三个界面全部自己写布局与交互",
+    "SQLite 设计用户表与笔记表，密码只存 PBKDF2 加盐摘要；笔记按账号隔离，增删改查全套 CRUD",
+    "加入全局异常捕获与操作级 try/catch，数据库出错只提示不闪退，崩溃堆栈落盘方便排查",
+    "已打出可安装的签名 APK（v1.0，minSdk 23），可直接装到 Android 手机上使用"
+  ],
+  "code": [
+    {
+      "title": "建表：用户表 + 笔记表 + 联合索引（Db.java）",
+      "text": "@Override\npublic void onCreate(SQLiteDatabase db) {\n    db.execSQL(\"CREATE TABLE users (\" +\n            \"id INTEGER PRIMARY KEY AUTOINCREMENT,\" +\n            \"username TEXT NOT NULL UNIQUE,\" +\n            \"salt TEXT NOT NULL,\" +\n            \"hash TEXT NOT NULL,\" +\n            \"created_at INTEGER NOT NULL)\");\n    db.execSQL(\"CREATE TABLE notes (\" +\n            \"id INTEGER PRIMARY KEY AUTOINCREMENT,\" +\n            \"user_id INTEGER NOT NULL,\" +\n            \"title TEXT NOT NULL DEFAULT '',\" +\n            \"content TEXT NOT NULL DEFAULT '',\" +\n            \"created_at INTEGER NOT NULL,\" +\n            \"updated_at INTEGER NOT NULL)\");\n    // 列表页永远是「某个人的笔记按更新时间倒序」，索引直接对着这个查询建\n    db.execSQL(\"CREATE INDEX idx_notes_user ON notes(user_id, updated_at DESC)\");\n}"
+    },
+    {
+      "title": "密码不存明文：PBKDF2 加盐摘要（Db.java）",
+      "text": "private static String digest(String password, byte[] salt) {\n    try {\n        PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);\n        byte[] out = SecretKeyFactory.getInstance(\"PBKDF2WithHmacSHA256\")\n                .generateSecret(spec).getEncoded();\n        return Base64.encodeToString(out, Base64.NO_WRAP);\n    } catch (Exception e) {\n        throw new IllegalStateException(\"密码摘要计算失败\", e);\n    }\n}\n\n// 校验时用同样的 salt 再算一遍，比对摘要而不是比对密码\nString expected = c.getString(2);\nreturn expected.equals(digest(password, salt)) ? c.getLong(0) : -1;"
+    },
+    {
+      "title": "列表查询：一个 SQL 兼顾搜索与排序（Db.java）",
+      "text": "StringBuilder sql = new StringBuilder(\n        \"SELECT id, title, content, created_at, updated_at FROM notes WHERE user_id = ?\");\nList<String> args = new ArrayList<>();\nargs.add(String.valueOf(userId));\n\nString k = keyword == null ? \"\" : keyword.trim();\nif (!k.isEmpty()) {\n    sql.append(\" AND (title LIKE ? OR content LIKE ?)\");\n    String like = \"%\" + k + \"%\";\n    args.add(like);\n    args.add(like);\n}\nsql.append(\" ORDER BY updated_at DESC\");\n\n// 全部用 ? 占位符，拼接的只有 SQL 结构，用户输入永远走参数，不存在注入\nCursor c = getReadableDatabase().rawQuery(sql.toString(), args.toArray(new String[0]));"
+    },
+    {
+      "title": "崩溃兜底：先落盘再交回系统（App.java）",
+      "text": "final Thread.UncaughtExceptionHandler previous = Thread.getDefaultUncaughtExceptionHandler();\nThread.setDefaultUncaughtExceptionHandler((thread, error) -> {\n    try {\n        CrashLog.save(App.this, thread, error);   // 堆栈写进 files/crash.log\n    } catch (Throwable ignored) {\n        // 兜底本身不能再崩\n    }\n    if (previous != null) previous.uncaughtException(thread, error);\n});"
+    }
+  ],
+  "download": "projects/03-随心记Android记事应用/随心记-v1.0.apk",
+  "downloadLabel": "下载 APK（1.0 · 31 KB）"
+}

@@ -1,0 +1,29 @@
+{
+  "title": "工业运维智能 Agent 原型",
+  "subtitle": "AI 应用实战项目 · 对话式故障诊断",
+  "period": "2026.05 – 2026.09",
+  "role": "独立开发（原型）",
+  "tags": ["Python", "DeepSeek API", "RAG 检索增强", "工具调用", "Prompt 工程"],
+  "summary": "仓储运维长期依赖人工巡检和经验判断，故障发现滞后、排查效率低，运维知识又分散在手册里难以即时调用。为此开发了一款面向仓储运维场景的轻量级 AI Agent 原型：一句话提问，它自己去读传感器、查知识库、做风险研判，最后给出处置步骤并可以直接生成工单。项目可在本地一条命令跑起来，没有 API key 时走离线规则引擎，配上 key 就切到 DeepSeek。",
+  "highlights": [
+    "基于 Python 与 DeepSeek 大模型 API 搭建 Agent 框架，设计对话记忆、意图识别与工具调用链路",
+    "开发模拟工具接口，可调取仓库温湿度、烟雾传感器数据，结合 Prompt 工程引导模型完成风险研判",
+    "输出故障根因分析、风险评估与标准化运维处置建议，并预留对接 STM32 感知终端的数据接口",
+    "零第三方 Web 框架：标准库 HTTP 服务 + 原生 JS 前端，python app.py 即可运行，离线也能完整演示",
+    "知识库用 Markdown 维护，检索层抽象成 search(query, top_k)，可整体替换为向量库而不动上层逻辑"
+  ],
+  "code": [
+    {
+      "title": "意图 → 工具 → 研判 → 回答（planner.py）",
+      "text": "def run(session_id: str, message: str) -> dict:\n    trace = []\n    intent, why = classify(message)          # 1. 规则识别意图\n    device_id = tools.resolve_device(message)  # 2. 从口语里认出终端编号\n\n    sensor_res = tools.read_sensors(device_id)\n    trace.append(_step(\"调用工具 · read_sensors\", sensor_res[\"text\"]))\n    rows = sensor_res[\"data\"]\n    target = _pick_target(rows, message, device_id, session_id)\n\n    know_res = tools.retrieve_knowledge(query, 5)   # 3. 知识库检索\n    trace.append(_step(\"检索知识库\", know_res[\"text\"]))\n\n    trace.append(_step(\"风险研判\", \"%s：%s 级\" % (target[\"name\"], target[\"level\"])))\n    if llm.available():                            # 4. 有大模型就交给它组织语言\n        answer_text = llm.complete(SYSTEM_PROMPT, history + [...])"
+    },
+    {
+      "title": "工具注册表：离线规则和大模型消费同一种结果（tools.py）",
+      "text": "def read_sensors(device_id: str | None = None) -> dict:\n    \"\"\"每个工具都返回 {ok, text, data}，上层不需要关心是谁调的。\"\"\"\n    if device_id:\n        d = sensors.get(device_id)\n        level, reasons = sensors.level_of(d)\n        d[\"level\"], d[\"reasons\"] = level, reasons\n        return {\"ok\": True, \"text\": \"%s 读数已取回\" % d[\"name\"], \"data\": [d]}\n\nREGISTRY = {\n    \"read_sensors\":      {\"desc\": \"读取温湿度与可燃气体\", \"run\": read_sensors},\n    \"retrieve_knowledge\": {\"desc\": \"检索运维知识库\",      \"run\": retrieve_knowledge},\n    \"create_ticket\":      {\"desc\": \"生成运维工单\",        \"run\": create_ticket},\n}"
+    },
+    {
+      "title": "STM32 数据接入：终端 POST 一次，看板立刻用真实读数（app.py）",
+      "text": "if path == \"/api/ingest\":\n    device = sensors.ingest(payload)   # {\"device_id\":\"WH-A1\",\"temp\":25.1,\"smoke\":130}\n    if not device:\n        return self._json({\"ok\": False, \"error\": \"未知设备\"}, 404)\n    return self._json({\"ok\": True, \"device\": device})"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>代林 · 作品集</title>
+<meta name="description" content="代林的作品集：AI Agent 原型、嵌入式硬件、Android 应用。">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     想改页面上的文字（名字、一句话介绍、联系方式），
+     直接改下面这几处中文即可，不用懂代码。
+     ============================================================ -->
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">代林</a>
+    <nav class="nav-links">
+      <a href="#works">作品</a>
+      <a href="#about">关于</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero wrap">
+    <p class="eyebrow">物联网工程 · AI 应用 · 嵌入式</p>
+
+    <!-- ↓ 改这里：你的名字 -->
+    <h1>代林</h1>
+
+    <!-- ↓ 改这里：一句话介绍，40 字以内最好看 -->
+    <p class="lede">
+      物联网应届毕业生，拥有 AI 原型、嵌入式硬件、Android 移动端三类项目实践，熟悉硬件采集到 AI 业务落地完整流程；不做底层模型训练，侧重 AI Agent、RAG 和物联网场景结合；擅长需求梳理、故障排查、文档撰写。意向物联网、AI 方向解决方案、技术实施岗位，可参与方案论证、原型验证和项目落地支撑工作。
+    </p>
+
+    <ul class="hero-meta">
+      <!-- ↓ 改这里：三到四条基本信息，不需要的直接删掉整行 -->
+      <li><span>学校</span>成都文理学院</li>
+      <li><span>专业</span>物联网工程</li>
+      <li><span>方向</span>AI 应用方向/嵌入式开发</li>
+      <li><span>联系</span>15282501774@163.com</li>
+    </ul>
+  </section>
+
+  <section id="works" class="works wrap">
+    <h2 class="section-title">项目</h2>
+    <!-- 卡片由 assets/script.js 自动生成，内容来自 assets/projects.js -->
+    <div id="project-list"></div>
+  </section>
+
+  <section id="about" class="about wrap">
+    <h2 class="section-title">关于</h2>
+    <div class="about-body">
+      <!-- ↓ 改这里：两三句话自我介绍 -->
+      <p>
+        物联网工程专业应届生，同时具备嵌入式硬件调试、Android 移动端开发和
+        AI 智能应用原型三类项目经验，熟悉从硬件感知到 AI 分析、再到业务落地的完整链路。
+      </p>
+      <p>
+        不侧重底层模型训练，核心聚焦 AI Agent、RAG 与物联网场景融合；擅长需求拆解、
+        问题排查与技术文档撰写。这个页面用来放我做过的项目，点图片可以放大看细节。
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer wrap">
+  <span>© <span id="year"></span> 代林</span>
+  <span class="footer-links">
+    <!-- ↓ 改这里：把 # 换成你的链接，没有就把整个 a 标签删掉 -->
+    <a href="#" target="_blank" rel="noopener">GitHub</a>
+    <a href="mailto:15282501774@163.com">Email</a>
+  </span>
+</footer>
+
+<!-- 图片放大层，不用管 -->
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lb-close" id="lb-close" aria-label="关闭">×</button>
+  <button class="lb-prev" id="lb-prev" aria-label="上一张">‹</button>
+  <img id="lb-img" alt="">
+  <button class="lb-next" id="lb-next" aria-label="下一张">›</button>
+  <p class="lb-caption" id="lb-caption"></p>
+</div>
+
+<script src="assets/projects.js"></script>
+<script src="assets/script.js"></script>
+</body>
+</html>
