@@ -2,7 +2,7 @@
    本文件自动生成，请勿手改。
    改内容请编辑 projects/<项目名>/info.json，
    然后重新运行「刷新列表.ps1」。
-   生成时间：2026-11-01 22:55:32
+   生成时间：2026-11-07 16:30:07
    ========================================================== */
 
 window.PROJECTS =[
@@ -153,6 +153,62 @@ window.PROJECTS =[
                            "src":  "projects/03-随心记Android记事应用/02-笔记列表.jpg",
                            "alt":  "02-笔记列表",
                            "caption":  "02-笔记列表"
+                       }
+                   ]
+    },
+    {
+        "id":  "04-校园图书馆借阅预约系统",
+        "title":  "校园图书馆借阅 / 自习室预约系统",
+        "subtitle":  "MySQL 数据库课程项目 · 借阅与座位预约",
+        "period":  "2026.10 – 2026.11",
+        "role":  "独立开发（数据库设计 + 后端 + 前端）",
+        "tags":  [
+                     "MySQL 8.0",
+                     "SQL 存储过程",
+                     "事务与行锁",
+                     "Python",
+                     "PyMySQL"
+                 ],
+        "summary":  "图书馆借书排队登记、自习室座位靠群里喊——这类流程用一张 Excel 记不住谁借了什么、哪个座位几点有人。于是把业务规则整体搬进 MySQL：借书、还书、订座都走存储过程，逾期扣分由触发器自动完成，热门图书、逾期名单、座位占用率由视图直接产出，后端只是一层薄薄的 HTTP 接口。同时用事务和行锁解决了「两个人同时借最后一本」的超借问题，并写了并发脚本验证。",
+        "highlights":  [
+                           "12 张表的设计：读者 / 书目 / 馆藏副本 / 借阅 / 罚金 / 自习室 / 座位 / 预约，外键、CHECK、索引与 ENUM 状态全覆盖",
+                           "借书、还书、订座三个存储过程承担全部业务规则，OUT 参数返回状态码，后端不做第二套判断",
+                           "并发安全：SELECT … FOR UPDATE 锁住副本行，两人同时借最后一本时只有一个成功（附并发测试脚本）",
+                           "触发器自动结算逾期：写罚金表 + 扣信用分，信用低于 60 自动冻结借书证",
+                           "4 个视图 + 1 个定时事件（每日标记逾期），报表类查询不写进后端代码",
+                           "最小权限：后端用独立账号 lib_app 只拿 SELECT/INSERT/UPDATE/EXECUTE，不接触 DDL"
+                       ],
+        "code":  [
+                     {
+                         "title":  "借书存储过程：一把锁解决超借（sql/01_schema.sql）",
+                         "text":  "-- 取一本在馆副本并锁住：并发借同一本书时只会有一个成功\nSELECT copy_id INTO v_copy_id FROM book_copy\n WHERE isbn = p_isbn AND status = '在馆'\n ORDER BY copy_id LIMIT 1 FOR UPDATE;\nIF v_copy_id IS NULL THEN\n  SET p_code = 1006, p_msg = '该书已全部借出';\n  LEAVE proc;\nEND IF;\n\nUPDATE book_copy SET status = '借出' WHERE copy_id = v_copy_id;\nSET p_due_at = DATE_ADD(NOW(), INTERVAL 30 DAY);\nINSERT INTO loan (copy_id, reader_id, borrow_at, due_at)\nVALUES (v_copy_id, v_reader_id, NOW(), p_due_at);"
+                     },
+                     {
+                         "title":  "逾期自动结算：归还触发器（sql/01_schema.sql）",
+                         "text":  "CREATE TRIGGER trg_loan_return\nAFTER UPDATE ON loan FOR EACH ROW\nBEGIN\n  DECLARE v_days INT;\n  IF NEW.return_at IS NOT NULL AND OLD.return_at IS NULL THEN\n    SET v_days = GREATEST(DATEDIFF(NEW.return_at, NEW.due_at), 0);\n    IF v_days > 0 THEN\n      INSERT INTO fine (loan_id, reader_id, days_overdue, amount)\n      VALUES (NEW.id, NEW.reader_id, v_days, v_days * 0.20);\n\n      UPDATE reader\n         SET credit = GREATEST(CAST(credit AS SIGNED) - v_days * 2, 0),\n             status = IF(GREATEST(CAST(credit AS SIGNED) - v_days * 2, 0) < 60, '冻结', status)\n       WHERE id = NEW.reader_id;\n    END IF;\n  END IF;\nEND"
+                     },
+                     {
+                         "title":  "预约冲突检查：同一座位的时段不允许重叠（sql/01_schema.sql）",
+                         "text":  "-- 同一座位、时间段重叠检查（加锁，避免两人抢到同一时段）\nSELECT COUNT(*) INTO v_conflict FROM reservation\n WHERE seat_id = p_seat_id\n   AND status IN ('已预约', '已签到')\n   AND start_at < p_end AND end_at > p_start\n FOR UPDATE;\nIF v_conflict > 0 THEN\n  SET p_code = 2005, p_msg = '该时段已被预约，换个时间或座位';\n  LEAVE proc;\nEND IF;"
+                     }
+                 ],
+        "download":  "",
+        "downloadLabel":  "",
+        "images":  [
+                       {
+                           "src":  "projects/04-校园图书馆借阅预约系统/01-借阅台.png",
+                           "alt":  "01-借阅台",
+                           "caption":  "01-借阅台"
+                       },
+                       {
+                           "src":  "projects/04-校园图书馆借阅预约系统/02-自习室座位预约.png",
+                           "alt":  "02-自习室座位预约",
+                           "caption":  "02-自习室座位预约"
+                       },
+                       {
+                           "src":  "projects/04-校园图书馆借阅预约系统/03-数据看板.png",
+                           "alt":  "03-数据看板",
+                           "caption":  "03-数据看板"
                        }
                    ]
     }
