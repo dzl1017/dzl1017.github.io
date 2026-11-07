@@ -2,7 +2,7 @@
    本文件自动生成，请勿手改。
    改内容请编辑 projects/<项目名>/info.json，
    然后重新运行「刷新列表.ps1」。
-   生成时间：2026-11-07 16:32:32
+   生成时间：2026-11-07 16:36:01
    ========================================================== */
 
 window.PROJECTS =[
@@ -185,7 +185,7 @@ window.PROJECTS =[
                      },
                      {
                          "title":  "逾期自动结算：归还触发器（sql/01_schema.sql）",
-                         "text":  "CREATE TRIGGER trg_loan_return\nAFTER UPDATE ON loan FOR EACH ROW\nBEGIN\n  DECLARE v_days INT;\n  IF NEW.return_at IS NOT NULL AND OLD.return_at IS NULL THEN\n    SET v_days = GREATEST(DATEDIFF(NEW.return_at, NEW.due_at), 0);\n    IF v_days > 0 THEN\n      INSERT INTO fine (loan_id, reader_id, days_overdue, amount)\n      VALUES (NEW.id, NEW.reader_id, v_days, v_days * 0.20);\n\n      UPDATE reader\n         SET credit = GREATEST(CAST(credit AS SIGNED) - v_days * 2, 0),\n             status = IF(GREATEST(CAST(credit AS SIGNED) - v_days * 2, 0) < 60, '冻结', status)\n       WHERE id = NEW.reader_id;\n    END IF;\n  END IF;\nEND"
+                         "text":  "CREATE TRIGGER trg_loan_return\nAFTER UPDATE ON loan FOR EACH ROW\nBEGIN\n  DECLARE v_days INT;\n  DECLARE v_credit INT;\n  IF NEW.return_at IS NOT NULL AND OLD.return_at IS NULL THEN\n    SET v_days = GREATEST(DATEDIFF(NEW.return_at, NEW.due_at), 0);\n    IF v_days > 0 THEN\n      INSERT INTO fine (loan_id, reader_id, days_overdue, amount)\n      VALUES (NEW.id, NEW.reader_id, v_days, v_days * 0.20);\n\n      -- 先把扣分后的值算出来再写：MySQL 的 SET 从左到右赋值，\n      -- 若在同一个 UPDATE 里先改 credit 再用 credit 判断，会扣两次\n      SELECT GREATEST(CAST(credit AS SIGNED) - v_days * 2, 0) INTO v_credit\n        FROM reader WHERE id = NEW.reader_id;\n      UPDATE reader\n         SET credit = v_credit,\n             status = IF(v_credit < 60, '冻结', status)\n       WHERE id = NEW.reader_id;\n    END IF;\n  END IF;\nEND"
                      },
                      {
                          "title":  "预约冲突检查：同一座位的时段不允许重叠（sql/01_schema.sql）",
