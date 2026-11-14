@@ -2,7 +2,7 @@
    本文件自动生成，请勿手改。
    改内容请编辑 projects/<项目名>/info.json，
    然后重新运行「刷新列表.ps1」。
-   生成时间：2026-11-07 16:36:01
+   生成时间：2026-11-14 12:57:41
    ========================================================== */
 
 window.PROJECTS =[
@@ -209,6 +209,56 @@ window.PROJECTS =[
                            "src":  "projects/04-校园图书馆借阅预约系统/03-数据看板.png",
                            "alt":  "03-数据看板",
                            "caption":  "03-数据看板"
+                       }
+                   ]
+    },
+    {
+        "id":  "05-RAG问答质量评测",
+        "title":  "RAG 问答质量评测平台",
+        "subtitle":  "AI 测试 · 自动化评测 + 并发压测",
+        "period":  "2026.09 – 2026.11",
+        "role":  "独立开发（测试设计 + 工具开发）",
+        "tags":  [
+                     "Python",
+                     "接口自动化",
+                     "评测指标",
+                     "并发压测",
+                     "缺陷管理"
+                 ],
+        "summary":  "问答系统上线前只能人工试问几句，答错了、编造了、引用和原文对不上都没人发现，改完 Prompt 也只能凭感觉说「好像变好了」。这个项目把「答得对不对」变成一套可重复执行的用例与指标：一条命令跑完 46 条用例，直接给出命中、引用、拒答、延迟的量化结果，并把发现的问题整理成带复现步骤的缺陷单。",
+        "highlights":  [
+                           "设计 46 条分层用例：功能问答 26 条、无答案 12 条、诱导幻觉 8 条，每条都标注期望文档与关键要点",
+                           "对被测服务的 /api/chat 做参数化执行与断言：响应结构、检索命中、要点覆盖、引用能否在知识库中定位",
+                           "首轮跑出五条缺陷，其中「回答普遍不带来源引用」占比 88.5%，推动 Prompt 增加引用约束后升到 84.6%",
+                           "分级并发（1/3/5/10）压测，吞吐从 0.57 提升到 3.67 rps，P95 稳定在 2.1–2.8 秒，错误率 0%",
+                           "整套判定口径写在代码里，换人跑结果一致；报告自动生成，改前改后可直接对比"
+                       ],
+        "code":  [
+                     {
+                         "title":  "一条用例的四项断言（eval.py）",
+                         "text":  "def check(case, body, labels_norm):\n    reply = body.get(\"reply\") or \"\"\n    src_labels = [s.get(\"label\", \"\") for s in body.get(\"sources\") or []]\n\n    hit = any(case[\"doc\"] in lb for lb in src_labels) if case.get(\"doc\") else None\n    points = all(kw in reply for kw in case[\"points\"]) if case.get(\"points\") else None\n\n    quotes = re.findall(r\"《([^》]+)》\", reply)          # 回答里自称的来源\n    bad = [q for q in quotes if not quote_ok(q, labels_norm)]\n    citation = len(bad) == 0 if quotes else None          # 引用必须能在知识库里定位\n\n    refused = any(m in reply for m in REFUSE_MARKERS)\n    refuse_ok = refused if case.get(\"refuse\") else None\n\n    checks = {\"hit\": hit, \"points\": points, \"citation\": citation, \"refuse\": refuse_ok}\n    return {\"checks\": checks, \"passed\": all(v for v in checks.values() if v is not None)}"
+                     },
+                     {
+                         "title":  "引用可溯源：允许只写小节名，但不许凭空造来源（eval.py）",
+                         "text":  "def norm(text):\n    \"\"\"去掉空格与分隔符，《A · B》和《A·B》要算同一个来源。\"\"\"\n    return re.sub(r\"[\\s·・\\-—–/、]+\", \"\", text or \"\")\n\n\ndef quote_ok(quote, labels_norm):\n    q = norm(quote)\n    if not q or quote.strip() in NON_KB_SOURCES:   # 《实时数据》是数据源说明，不算伪造引用\n        return True\n    return any(q in lb or lb.endswith(q) for lb in labels_norm)"
+                     },
+                     {
+                         "title":  "分级并发压测（perf.py）",
+                         "text":  "for level in LEVELS:                     # 1 / 3 / 5 / 10\n    t0 = time.time()\n    with ThreadPoolExecutor(max_workers=level) as pool:\n        rows = list(pool.map(lambda i: once(i, level), range(ROUNDS)))\n    wall = time.time() - t0\n    lat = sorted(r[0] for r in rows)\n    item = {\n        \"concurrency\": level,\n        \"throughput_rps\": round(len(rows) / wall, 2),\n        \"p50_ms\": int(lat[len(lat) // 2]),\n        \"p95_ms\": int(lat[min(len(lat) - 1, int(len(lat) * 0.95))]),\n        \"error_rate\": round(sum(1 for r in rows if not r[1]) / len(rows) * 100, 1),\n    }"
+                     }
+                 ],
+        "download":  "",
+        "downloadLabel":  "",
+        "images":  [
+                       {
+                           "src":  "projects/05-RAG问答质量评测/01-评测报告.png",
+                           "alt":  "01-评测报告",
+                           "caption":  "01-评测报告"
+                       },
+                       {
+                           "src":  "projects/05-RAG问答质量评测/02-缺陷单与用例明细.png",
+                           "alt":  "02-缺陷单与用例明细",
+                           "caption":  "02-缺陷单与用例明细"
                        }
                    ]
     }
